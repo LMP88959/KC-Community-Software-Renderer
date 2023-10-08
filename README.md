@@ -7,6 +7,9 @@ Anyone can contribute! This is meant to be a for-fun software renderer that ever
 
 It is based off of the [PL3D-KC](https://github.com/LMP88959/PL3D-KC) project.
 
+## Rules  
+As of Oct 8 2023, the only rule is that any added SIMD or platform specific code must have a non platform specific fallback available.
+
 ================================================================
 
 Compiling for macOS/Linux:
