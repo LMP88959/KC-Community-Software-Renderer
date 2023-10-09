@@ -1,11 +1,11 @@
 /*****************************************************************************/
 /*
  * FW LE (Lite edition) - Fundamentals of the King's Crook graphics engine.
- * 
+ *
  *   by EMMIR 2018-2022
- *   
+ *
  *   YouTube: https://www.youtube.com/c/LMP88
- *   
+ *
  * This software is released into the public domain.
  */
 /*****************************************************************************/
@@ -13,60 +13,63 @@
 #include "fw_priv.h"
 
 /*  sys.c
- * 
+ *
  * Contains main loop and sets up signal handlers.
- * 
+ *
  */
 
 #include <signal.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 
-static int upd_rate   = 70;
+static int upd_rate = 70;
 static int upd_period = 14; /* 1000 / 70 */
 static int cap_fps = 0;
 static int fps = 0;
 static int req_shutdown = 0;
 
-static void def_func(void)        {}
-static void (*update_func)(void)  = def_func;
+static void
+def_func(void)
+{
+}
+static void (*update_func)(void) = def_func;
 static void (*display_func)(void) = def_func;
 
 static void
 signal_cb(int s)
 {
     switch (s) {
-        case SIGABRT:
-            fprintf(stderr, "abort\n");
-            break;
-        case SIGILL:
-            fprintf(stderr, "illegal operation\n");
-            break;
-        case SIGSEGV:
-            fprintf(stderr, "segmentation fault\n");
-            break;
-        case SIGINT:
-            fprintf(stderr, "interrupted\n");
-            break;
-        case SIGFPE:
-            fprintf(stderr, "divide by zero most likely\n");
-            break;
-        case SIGTERM:
-            fprintf(stderr, "termination signal\n");
-            break;
+    case SIGABRT:
+        fprintf(stderr, "abort\n");
+        break;
+    case SIGILL:
+        fprintf(stderr, "illegal operation\n");
+        break;
+    case SIGSEGV:
+        fprintf(stderr, "segmentation fault\n");
+        break;
+    case SIGINT:
+        fprintf(stderr, "interrupted\n");
+        break;
+    case SIGFPE:
+        fprintf(stderr, "divide by zero most likely\n");
+        break;
+    case SIGTERM:
+        fprintf(stderr, "termination signal\n");
+        break;
 #ifdef SIGQUIT
-        case SIGQUIT:
-            fprintf(stderr, "quit signal\n");
-            break;
+    case SIGQUIT:
+        fprintf(stderr, "quit signal\n");
+        break;
 #endif
-        default:
-            fprintf(stderr, "unexpected signal %d\n", s);
-            break;
+    default:
+        fprintf(stderr, "unexpected signal %d\n", s);
+        break;
     }
     wnd_term();
 #ifdef FW_OS_TYPE_WINDOWS
-	getchar();
+    getchar();
 #else
     raise(s);
 #endif
@@ -80,18 +83,18 @@ sys_sethz(int hz)
         hz = 70;
         return;
     }
-    
-    upd_rate   = hz;
+
+    upd_rate = hz;
     upd_period = 1000 / upd_rate;
 }
 
 extern void
 sys_init(void)
 {
-    signal(SIGINT,  signal_cb);
+    signal(SIGINT, signal_cb);
     signal(SIGSEGV, signal_cb);
-    signal(SIGFPE,  signal_cb);
-    signal(SIGILL,  signal_cb);
+    signal(SIGFPE, signal_cb);
+    signal(SIGILL, signal_cb);
     signal(SIGABRT, signal_cb);
     signal(SIGTERM, signal_cb);
 #ifdef SIGQUIT
@@ -131,11 +134,11 @@ sys_start(void)
     int tfps, dt;
 
     FW_info("[sys] FW system starting");
-    
+
     /* simple loop, doesn't play catch-up when fps is low */
     clk_init();
-    
-    tfps   = 0;
+
+    tfps = 0;
     prvclk = clk_sample();
     nxtsec = clk_sample() + 1000;
     req_shutdown = 0;
@@ -153,12 +156,12 @@ sys_start(void)
         }
         prvclk = curclk;
         pkb_poll();
-        update_func();        
+        update_func();
         display_func();
         tfps++;
         if (clk_sample() >= nxtsec) {
-            fps     = tfps;
-            tfps    = 0;
+            fps = tfps;
+            tfps = 0;
             nxtsec += 1000;
         }
     }
@@ -206,7 +209,7 @@ extern void
 FW_info(char *s, ...)
 {
     va_list lst;
-    
+
     printf("[fw] INFO: ");
     va_start(lst, s);
     vprintf(s, lst);
@@ -224,7 +227,7 @@ FW_error(char *s, ...)
     vfprintf(stderr, s, lst);
     va_end(lst);
     fprintf(stderr, "\n");
-    
+
     wnd_term();
     getchar();
     exit(0);

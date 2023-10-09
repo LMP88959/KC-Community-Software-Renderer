@@ -1,0 +1,9 @@
+﻿AlwaysBreakAfterDefinitionReturnType: All
+AlwaysBreakAfterReturnType: AllDefinitions
+BreakBeforeBraces: WebKit
+ColumnLimit: '80'
+IndentWidth: '4'
+Language: Cpp
+PointerAlignment: Right
+UseTab: Never
+InsertBraces: true
