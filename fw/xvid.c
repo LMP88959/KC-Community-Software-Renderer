@@ -25,11 +25,11 @@
  */
 #ifdef FW_OS_TYPE_X11
 
+#include <ctype.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <errno.h>
 #if FW_X11_IS_MACOS
 #include <sys/sysctl.h>
 #endif
@@ -41,19 +41,19 @@
 #include <X11/keysym.h>
 
 #if FW_X11_HAS_SHM_EXT
+#include <X11/extensions/XShm.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
-#include <X11/extensions/XShm.h>
 #endif
 
 static struct {
     Display *display;
-    int      screen;
+    int screen;
 
     Window root_wnd;
     Window window;
 
-    GC      gc;
+    GC gc;
     Visual *visual;
     XImage *ximage;
 
@@ -65,30 +65,29 @@ static struct {
 #endif
     int use_shm;
 } FWi_x = {
-        NULL, /* display */
-        0,    /* screen */
+    NULL, /* display */
+    0,    /* screen */
 
-        None, /* root_wnd */
-        None, /* window */
+    None, /* root_wnd */
+    None, /* window */
 
-        None, /* gc */
-        NULL, /* visual */
-        NULL, /* ximage */
+    None, /* gc */
+    NULL, /* visual */
+    NULL, /* ximage */
 
-        320,  /* width */
-        200,  /* height */
-        32,   /* depth */
+    320, /* width */
+    200, /* height */
+    32,  /* depth */
 
 #if FW_X11_HAS_SHM_EXT
-        { 0, 0, 0, 0 }, /* shminfo */
+    {0, 0, 0, 0}, /* shminfo */
 #endif
-        0,    /* use_shm */
+    0, /* use_shm */
 };
 
-#define FW_XEVENT_MASK \
-        (KeyPressMask        | KeyReleaseMask    | \
-         StructureNotifyMask | FocusChangeMask   | \
-         ButtonPressMask     | ButtonReleaseMask | PointerMotionMask)
+#define FW_XEVENT_MASK                                                         \
+    (KeyPressMask | KeyReleaseMask | StructureNotifyMask | FocusChangeMask |   \
+     ButtonPressMask | ButtonReleaseMask | PointerMotionMask)
 
 static void xkey_callb(XKeyEvent *event);
 
@@ -138,18 +137,18 @@ static int
 readevent(XEvent *e)
 {
     switch (e->type) {
-        case KeyPress:
-        case KeyRelease:
-            xkey_callb(&e->xkey);
-            return 1;
-        case FocusOut:
-            pkb_reset();
-            return 0;
-        case MappingNotify:
-            XRefreshKeyboardMapping(&e->xmapping);
-            return 1;
-        default:
-            return 1;
+    case KeyPress:
+    case KeyRelease:
+        xkey_callb(&e->xkey);
+        return 1;
+    case FocusOut:
+        pkb_reset();
+        return 0;
+    case MappingNotify:
+        XRefreshKeyboardMapping(&e->xmapping);
+        return 1;
+    default:
+        return 1;
     }
 }
 
@@ -157,10 +156,10 @@ static int
 open_xdisplay(void)
 {
     XSetWindowAttributes setattr;
-    XWindowAttributes    getattr;
+    XWindowAttributes getattr;
     unsigned long rm, bm;
     XClassHint hint;
-    XWMHints   wm_hints;
+    XWMHints wm_hints;
     int winmask;
     Display *d;
 
@@ -169,36 +168,34 @@ open_xdisplay(void)
         return 0;
     }
     FWi_x.display = XOpenDisplay(NULL);
-    FWi_x.screen  = 0;
+    FWi_x.screen = 0;
     if (FWi_x.display == NULL) {
         return 0;
     }
 
     d = FWi_x.display;
 
-    FWi_x.screen   = XDefaultScreen    (d);
+    FWi_x.screen = XDefaultScreen(d);
     FWi_x.root_wnd = XDefaultRootWindow(d);
 
-    setattr.event_mask       = FW_XEVENT_MASK;
-    setattr.border_pixel     = BlackPixel(d, FWi_x.screen);
+    setattr.event_mask = FW_XEVENT_MASK;
+    setattr.border_pixel = BlackPixel(d, FWi_x.screen);
     setattr.background_pixel = setattr.border_pixel;
 
-    winmask      = CWEventMask;
-    FWi_x.window = XCreateWindow(
-            d, FWi_x.root_wnd, 0, 0,
-            320, 200, 0, CopyFromParent,
-            InputOutput, CopyFromParent,
-            winmask, &setattr);
+    winmask = CWEventMask;
+    FWi_x.window =
+        XCreateWindow(d, FWi_x.root_wnd, 0, 0, 320, 200, 0, CopyFromParent,
+                      InputOutput, CopyFromParent, winmask, &setattr);
 
     XGetWindowAttributes(d, FWi_x.window, &getattr);
     FWi_x.visual = getattr.visual;
-    FWi_x.depth  = getattr.depth;
+    FWi_x.depth = getattr.depth;
     if (FWi_x.depth != 24 && FWi_x.depth != 32) {
         FW_info("[xvid] true color display required");
         XCloseDisplay(d);
         return 0;
     }
-    rm = FWi_x.visual->red_mask  & 0xffffff;
+    rm = FWi_x.visual->red_mask & 0xffffff;
     bm = FWi_x.visual->blue_mask & 0xffffff;
     if ((rm == 0xff && bm == 0xff0000)) {
         FW_info("[xvid] detected bgr! only rgb supported, continuing anyways");
@@ -207,14 +204,14 @@ open_xdisplay(void)
     WM_DELETE_WINDOW = XInternAtom(d, "WM_DELETE_WINDOW", False);
     XSetWMProtocols(d, FWi_x.window, &WM_DELETE_WINDOW, 1);
 
-    hint.res_name  = "jvfwLE";
+    hint.res_name = "jvfwLE";
     hint.res_class = "JvFWLE";
     XSetClassHint(d, FWi_x.window, &hint);
 
-    wm_hints.flags         = InputHint | StateHint | WindowGroupHint;
-    wm_hints.input         = True;
+    wm_hints.flags = InputHint | StateHint | WindowGroupHint;
+    wm_hints.input = True;
     wm_hints.initial_state = NormalState;
-    wm_hints.window_group  = FWi_x.window;
+    wm_hints.window_group = FWi_x.window;
     XSetWMHints(d, FWi_x.window, &wm_hints);
     FWi_x.gc = XCreateGC(d, FWi_x.window, 0, NULL);
     return 1;
@@ -232,7 +229,7 @@ test_xlocal(void)
     if (name != NULL) {
         loc |= (name[0] == ':');
         loc |= (strncmp(name, "unix:", 5) == 0);
-        loc |= (strstr (name, "xquartz:") != NULL); /* xquartz on mac */
+        loc |= (strstr(name, "xquartz:") != NULL); /* xquartz on mac */
     }
     return loc;
 }
@@ -241,8 +238,8 @@ static int
 test_xshm(Display *display)
 {
 #if FW_X11_HAS_SHM_EXT
-    int  major;
-    int  minor;
+    int major;
+    int minor;
     Bool b;
 #endif
     int n;
@@ -265,19 +262,23 @@ static long
 FWi_stol(register char *is, int *err)
 {
     char *tailptr;
-    long  val;
-    int   i;
+    long val;
+    int i;
 
     if (is == NULL) {
         return 0;
     }
-    while (isspace(*is)) { is++; }
+    while (isspace(*is)) {
+        is++;
+    }
     i = 0;
-    while (!isspace(is[i])) { i++; }
+    while (!isspace(is[i])) {
+        i++;
+    }
     is[i] = '\0';
     errno = 0;
-    *err  = 0;
-    val   = strtol(is, &tailptr, 10);
+    *err = 0;
+    val = strtol(is, &tailptr, 10);
     if (errno == ERANGE) {
         FW_info("[xvid] out of integer range");
         *err = 1;
@@ -293,14 +294,15 @@ FWi_stol(register char *is, int *err)
 #endif
 
 static long
-find_shmmax(int *guess) {
-    long  maxseg = (1 << 22); /* 4MB */
+find_shmmax(int *guess)
+{
+    long maxseg = (1 << 22); /* 4MB */
 #if FW_X11_IS_MACOS
     FILE *f;
-    char  buf[256];
+    char buf[256];
     char *sub;
-    long  size;
-    int   err = 0;
+    long size;
+    int err = 0;
 
     *guess = 1;
     f = popen("sysctl kern.sysv.shmmax", "r");
@@ -317,8 +319,9 @@ find_shmmax(int *guess) {
         }
     }
 #else
-    /* unused variable handling suggested by https://www.reddit.com/user/skeeto/ */
-    (void) guess;
+    /* unused variable handling suggested by https://www.reddit.com/user/skeeto/
+     */
+    (void)guess;
 #endif
     return maxseg;
 }
@@ -326,20 +329,20 @@ find_shmmax(int *guess) {
 static int
 create_xvidbuffer(int w, int h, int shm)
 {
-    XImage  *img = NULL;
+    XImage *img = NULL;
     Display *d;
-    Visual  *vis;
-    int  dpth;
+    Visual *vis;
+    int dpth;
     long shmmx;
-    int  shmsz;
-    int  guess, success;
-    GC   gc;
+    int shmsz;
+    int guess, success;
+    GC gc;
 
     guess = 0;
     success = 0;
 
-    d    = FWi_x.display;
-    vis  = FWi_x.visual;
+    d = FWi_x.display;
+    vis = FWi_x.visual;
     dpth = FWi_x.depth;
 
     if (d == NULL) {
@@ -375,7 +378,7 @@ create_xvidbuffer(int w, int h, int shm)
 
         img->data = shmat(FWi_x.shminfo.shmid, NULL, 0);
         FWi_x.shminfo.shmaddr = img->data;
-        if (FWi_x.shminfo.shmaddr == (char*) -1) {
+        if (FWi_x.shminfo.shmaddr == (char *)-1) {
             FW_info("[xvid] error shmat failed");
             goto shm_err_failshmat;
         }
@@ -402,12 +405,18 @@ create_xvidbuffer(int w, int h, int shm)
         XSync(d, False);
         goto shm_success;
 
-        shm_err_failattach: shmdt (FWi_x.shminfo.shmaddr);
-        shm_err_failshmat:  shmctl(FWi_x.shminfo.shmid, IPC_RMID, 0);
-        shm_err_failshmget: XDestroyImage(img); img = NULL;
-        shm_err_nullimg:    FWi_x.use_shm = 0;
-        /* marks shared mem for deletion after X server+client detach */
-        shm_success:        shmctl(FWi_x.shminfo.shmid, IPC_RMID, 0);
+    shm_err_failattach:
+        shmdt(FWi_x.shminfo.shmaddr);
+    shm_err_failshmat:
+        shmctl(FWi_x.shminfo.shmid, IPC_RMID, 0);
+    shm_err_failshmget:
+        XDestroyImage(img);
+        img = NULL;
+    shm_err_nullimg:
+        FWi_x.use_shm = 0;
+    /* marks shared mem for deletion after X server+client detach */
+    shm_success:
+        shmctl(FWi_x.shminfo.shmid, IPC_RMID, 0);
         FW_info("[xvid] using X-Windows SHM extension: %d", FWi_x.use_shm);
     }
 #endif
@@ -429,7 +438,7 @@ create_xvidbuffer(int w, int h, int shm)
 extern int
 vid_open(char *title, int width, int height, int scale, int flags)
 {
-    XSizeHints hints = { 0 };
+    XSizeHints hints = {0};
     Display *d;
     XEvent evt;
     int w, h, rw, rh, bpp;
@@ -452,18 +461,18 @@ vid_open(char *title, int width, int height, int scale, int flags)
 
     bpp = FW_curinfo.bytespp;
 
-    FW_curinfo.width  = FW_BYTE_ALIGN(width , bpp);
+    FW_curinfo.width = FW_BYTE_ALIGN(width, bpp);
     FW_curinfo.height = FW_BYTE_ALIGN(height, bpp);
     rw = FW_curinfo.width;
     rh = FW_curinfo.height;
 
     FW_curinfo.pitch = FW_CALC_PITCH(rw, bpp);
 
-    deviceinfo.scale  = scale;
-    deviceinfo.width  = FW_BYTE_ALIGN(rw * scale, bpp);
+    deviceinfo.scale = scale;
+    deviceinfo.width = FW_BYTE_ALIGN(rw * scale, bpp);
     deviceinfo.height = FW_BYTE_ALIGN(rh * scale, bpp);
 
-    FWi_x.width  = deviceinfo.width;
+    FWi_x.width = deviceinfo.width;
     FWi_x.height = deviceinfo.height;
     w = FWi_x.width;
     h = FWi_x.height;
@@ -480,8 +489,8 @@ vid_open(char *title, int width, int height, int scale, int flags)
 
     XResizeWindow(d, FWi_x.window, w, h);
 
-    hints.flags      = PMinSize | PMaxSize | PBaseSize;
-    hints.min_width  = hints.max_width  = hints.base_width = w;
+    hints.flags = PMinSize | PMaxSize | PBaseSize;
+    hints.min_width = hints.max_width = hints.base_width = w;
     hints.min_height = hints.max_height = hints.base_height = h;
     XSetWMNormalHints(d, FWi_x.window, &hints);
 
@@ -490,7 +499,7 @@ vid_open(char *title, int width, int height, int scale, int flags)
         XMaskEvent(d, StructureNotifyMask, &evt);
     } while ((evt.type != MapNotify) || (evt.xmap.event != FWi_x.window));
 
-    XStoreName  (d, FWi_x.window, title);
+    XStoreName(d, FWi_x.window, title);
     XSetIconName(d, FWi_x.window, title);
 
     XSelectInput(d, FWi_x.window, FW_XEVENT_MASK);
@@ -516,8 +525,8 @@ vid_open(char *title, int width, int height, int scale, int flags)
 }
 
 static void
-resizevideo(unsigned *src, unsigned sw, unsigned sh,
-            unsigned *dst, unsigned dw, unsigned dh)
+resizevideo(unsigned *src, unsigned sw, unsigned sh, unsigned *dst, unsigned dw,
+            unsigned dh)
 {
     register unsigned *t, *p;
     int ratx, raty, acc;
@@ -544,12 +553,12 @@ vid_blit(void)
     unsigned *v;
     unsigned sw, sh, dw, dh;
 
-    v  = (unsigned *) FW_curinfo.video;
-    d  = FWi_x.display;
+    v = (unsigned *)FW_curinfo.video;
+    d = FWi_x.display;
     if ((v == NULL) || (d == NULL)) {
         return;
     }
-    w  = FWi_x.window;
+    w = FWi_x.window;
     sw = FW_curinfo.width;
     sh = FW_curinfo.height;
     dw = deviceinfo.width;
@@ -558,7 +567,7 @@ vid_blit(void)
     if (deviceinfo.scale == 1) {
         memcpy(FWi_x.ximage->data, v, dw * dh * 4);
     } else {
-        resizevideo(v, sw, sh, (unsigned *) FWi_x.ximage->data, dw, dh);
+        resizevideo(v, sw, sh, (unsigned *)FWi_x.ximage->data, dw, dh);
     }
     if (FWi_x.use_shm) {
 #if FW_X11_HAS_SHM_EXT
@@ -606,7 +615,7 @@ wnd_osm_handle(void)
         memset(&e, 0, sizeof(XEvent));
         XNextEvent(FWi_x.display, &e);
         if (e.type == ClientMessage &&
-            (Atom) e.xclient.data.l[0] == WM_DELETE_WINDOW) {
+            (Atom)e.xclient.data.l[0] == WM_DELETE_WINDOW) {
             sys_kill();
             return 0;
         }
@@ -626,7 +635,7 @@ close_xdisplay(void)
 #if FW_X11_HAS_SHM_EXT
         if (FWi_x.use_shm) {
             XShmDetach(FWi_x.display, &FWi_x.shminfo);
-            shmdt (FWi_x.shminfo.shmaddr);
+            shmdt(FWi_x.shminfo.shmaddr);
             shmctl(FWi_x.shminfo.shmid, IPC_RMID, 0);
             XSync(FWi_x.display, False);
         }
@@ -645,7 +654,7 @@ close_xdisplay(void)
     }
 
     if (FWi_x.window != None) {
-        XUnmapWindow  (FWi_x.display, FWi_x.window);
+        XUnmapWindow(FWi_x.display, FWi_x.window);
         XDestroyWindow(FWi_x.display, FWi_x.window);
         FWi_x.window = None;
     }
@@ -723,7 +732,7 @@ hardware_clk_ms(int *avail) /* return 0 in int* if not avail */
 
     *avail = 1;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (utime) (ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
+    return (utime)(ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
 }
 #endif
 
@@ -747,13 +756,13 @@ clk_mode(int mode)
         return;
     }
     switch (mode) {
-        case FW_CLK_MODE_LORES:
-        case FW_CLK_MODE_HIRES:
-            clock_mode = mode;
-            break;
-        default:
-            FW_error("[xclk] invalid clock mode");
-            break;
+    case FW_CLK_MODE_LORES:
+    case FW_CLK_MODE_HIRES:
+        clock_mode = mode;
+        break;
+    default:
+        FW_error("[xclk] invalid clock mode");
+        break;
     }
 }
 
@@ -781,139 +790,140 @@ clk_sample(void)
 fbclk:
     gettimeofday(&tv, NULL);
     return (tv.tv_sec * 1000 + tv.tv_usec / 1000);
-
 }
 
-static void def_keyboard_func(int key) { (void) key; }
-static void (*keyboard_func)(int key)   = def_keyboard_func;
+static void
+def_keyboard_func(int key)
+{
+    (void)key;
+}
+static void (*keyboard_func)(int key) = def_keyboard_func;
 static void (*keyboardup_func)(int key) = def_keyboard_func;
 
 static struct {
-   KeySym keysym;
-   int key;
-} xl8tab[] = {
-   {XK_a, 'a'},
-   {XK_b, 'b'},
-   {XK_c, 'c'},
-   {XK_d, 'd'},
-   {XK_e, 'e'},
-   {XK_f, 'f'},
-   {XK_g, 'g'},
-   {XK_h, 'h'},
-   {XK_i, 'i'},
-   {XK_j, 'j'},
-   {XK_k, 'k'},
-   {XK_l, 'l'},
-   {XK_m, 'm'},
-   {XK_n, 'n'},
-   {XK_o, 'o'},
-   {XK_p, 'p'},
-   {XK_q, 'q'},
-   {XK_r, 'r'},
-   {XK_s, 's'},
-   {XK_t, 't'},
-   {XK_u, 'u'},
-   {XK_v, 'v'},
-   {XK_w, 'w'},
-   {XK_x, 'x'},
-   {XK_y, 'y'},
-   {XK_z, 'z'},
+    KeySym keysym;
+    int key;
+} xl8tab[] = {{XK_a, 'a'},
+              {XK_b, 'b'},
+              {XK_c, 'c'},
+              {XK_d, 'd'},
+              {XK_e, 'e'},
+              {XK_f, 'f'},
+              {XK_g, 'g'},
+              {XK_h, 'h'},
+              {XK_i, 'i'},
+              {XK_j, 'j'},
+              {XK_k, 'k'},
+              {XK_l, 'l'},
+              {XK_m, 'm'},
+              {XK_n, 'n'},
+              {XK_o, 'o'},
+              {XK_p, 'p'},
+              {XK_q, 'q'},
+              {XK_r, 'r'},
+              {XK_s, 's'},
+              {XK_t, 't'},
+              {XK_u, 'u'},
+              {XK_v, 'v'},
+              {XK_w, 'w'},
+              {XK_x, 'x'},
+              {XK_y, 'y'},
+              {XK_z, 'z'},
 
-   {XK_A, 'A'},
-   {XK_B, 'B'},
-   {XK_C, 'C'},
-   {XK_D, 'D'},
-   {XK_E, 'E'},
-   {XK_F, 'F'},
-   {XK_G, 'G'},
-   {XK_H, 'H'},
-   {XK_I, 'I'},
-   {XK_J, 'J'},
-   {XK_K, 'K'},
-   {XK_L, 'L'},
-   {XK_M, 'M'},
-   {XK_N, 'N'},
-   {XK_O, 'O'},
-   {XK_P, 'P'},
-   {XK_Q, 'Q'},
-   {XK_R, 'R'},
-   {XK_S, 'S'},
-   {XK_T, 'T'},
-   {XK_U, 'U'},
-   {XK_V, 'V'},
-   {XK_W, 'W'},
-   {XK_X, 'X'},
-   {XK_Y, 'Y'},
-   {XK_Z, 'Z'},
+              {XK_A, 'A'},
+              {XK_B, 'B'},
+              {XK_C, 'C'},
+              {XK_D, 'D'},
+              {XK_E, 'E'},
+              {XK_F, 'F'},
+              {XK_G, 'G'},
+              {XK_H, 'H'},
+              {XK_I, 'I'},
+              {XK_J, 'J'},
+              {XK_K, 'K'},
+              {XK_L, 'L'},
+              {XK_M, 'M'},
+              {XK_N, 'N'},
+              {XK_O, 'O'},
+              {XK_P, 'P'},
+              {XK_Q, 'Q'},
+              {XK_R, 'R'},
+              {XK_S, 'S'},
+              {XK_T, 'T'},
+              {XK_U, 'U'},
+              {XK_V, 'V'},
+              {XK_W, 'W'},
+              {XK_X, 'X'},
+              {XK_Y, 'Y'},
+              {XK_Z, 'Z'},
 
-   {XK_0, '0'},
-   {XK_1, '1'},
-   {XK_2, '2'},
-   {XK_3, '3'},
-   {XK_4, '4'},
-   {XK_5, '5'},
-   {XK_6, '6'},
-   {XK_7, '7'},
-   {XK_8, '8'},
-   {XK_9, '9'},
+              {XK_0, '0'},
+              {XK_1, '1'},
+              {XK_2, '2'},
+              {XK_3, '3'},
+              {XK_4, '4'},
+              {XK_5, '5'},
+              {XK_6, '6'},
+              {XK_7, '7'},
+              {XK_8, '8'},
+              {XK_9, '9'},
 
-   {XK_KP_0, '0'},
-   {XK_KP_Insert, '0'},
-   {XK_KP_1, '1'},
-   {XK_KP_End, '1'},
-   {XK_KP_2, '2'},
-   {XK_KP_Down, '2'},
-   {XK_KP_3, '3'},
-   {XK_KP_Page_Down, '3'},
-   {XK_KP_4, '4'},
-   {XK_KP_Left, '4'},
-   {XK_KP_5, '5'},
-   {XK_KP_Begin, '5'},
-   {XK_KP_6, '6'},
-   {XK_KP_Right, '6'},
-   {XK_KP_7, '7'},
-   {XK_KP_Home, '7'},
-   {XK_KP_8, '8'},
-   {XK_KP_Up, '8'},
-   {XK_KP_9, '9'},
-   {XK_KP_Page_Up, '9'},
-   {XK_KP_Delete, FW_KEY_BACKSPACE},
-   {XK_KP_Decimal, FW_KEY_BACKSPACE},
+              {XK_KP_0, '0'},
+              {XK_KP_Insert, '0'},
+              {XK_KP_1, '1'},
+              {XK_KP_End, '1'},
+              {XK_KP_2, '2'},
+              {XK_KP_Down, '2'},
+              {XK_KP_3, '3'},
+              {XK_KP_Page_Down, '3'},
+              {XK_KP_4, '4'},
+              {XK_KP_Left, '4'},
+              {XK_KP_5, '5'},
+              {XK_KP_Begin, '5'},
+              {XK_KP_6, '6'},
+              {XK_KP_Right, '6'},
+              {XK_KP_7, '7'},
+              {XK_KP_Home, '7'},
+              {XK_KP_8, '8'},
+              {XK_KP_Up, '8'},
+              {XK_KP_9, '9'},
+              {XK_KP_Page_Up, '9'},
+              {XK_KP_Delete, FW_KEY_BACKSPACE},
+              {XK_KP_Decimal, FW_KEY_BACKSPACE},
 
-   {XK_Escape, FW_KEY_ESCAPE},
-   {XK_grave, '~'},
-   {XK_minus, FW_KEY_MINUS},
-   {XK_equal, FW_KEY_EQUALS},
-   {XK_KP_Subtract, FW_KEY_MINUS},
-   {XK_KP_Add, FW_KEY_PLUS},
-   {XK_KP_Enter, FW_KEY_ENTER},
-   {XK_KP_Equal, FW_KEY_EQUALS},
-   {XK_KP_Divide, '/'},
-   {XK_KP_Multiply, '*'},
-   {XK_BackSpace, FW_KEY_BACKSPACE},
-   {XK_Tab, FW_KEY_TAB},
-   {XK_bracketleft, '['},
-   {XK_bracketright, ']'},
-   {XK_Return, FW_KEY_ENTER},
-   {XK_semicolon, ':'},
-   {XK_apostrophe, '\''},
-   {XK_backslash, '\\'},
-   {XK_less, '<'},
-   {XK_comma, ','},
-   {XK_period, '.'},
-   {XK_slash, '/'},
-   {XK_space, FW_KEY_SPACE},
-   {XK_Delete, FW_KEY_BACKSPACE},
-   {XK_Left, FW_KEY_ARROW_LEFT},
-   {XK_Right, FW_KEY_ARROW_RIGHT},
-   {XK_Up, FW_KEY_ARROW_UP},
-   {XK_Down, FW_KEY_ARROW_DOWN},
+              {XK_Escape, FW_KEY_ESCAPE},
+              {XK_grave, '~'},
+              {XK_minus, FW_KEY_MINUS},
+              {XK_equal, FW_KEY_EQUALS},
+              {XK_KP_Subtract, FW_KEY_MINUS},
+              {XK_KP_Add, FW_KEY_PLUS},
+              {XK_KP_Enter, FW_KEY_ENTER},
+              {XK_KP_Equal, FW_KEY_EQUALS},
+              {XK_KP_Divide, '/'},
+              {XK_KP_Multiply, '*'},
+              {XK_BackSpace, FW_KEY_BACKSPACE},
+              {XK_Tab, FW_KEY_TAB},
+              {XK_bracketleft, '['},
+              {XK_bracketright, ']'},
+              {XK_Return, FW_KEY_ENTER},
+              {XK_semicolon, ':'},
+              {XK_apostrophe, '\''},
+              {XK_backslash, '\\'},
+              {XK_less, '<'},
+              {XK_comma, ','},
+              {XK_period, '.'},
+              {XK_slash, '/'},
+              {XK_space, FW_KEY_SPACE},
+              {XK_Delete, FW_KEY_BACKSPACE},
+              {XK_Left, FW_KEY_ARROW_LEFT},
+              {XK_Right, FW_KEY_ARROW_RIGHT},
+              {XK_Up, FW_KEY_ARROW_UP},
+              {XK_Down, FW_KEY_ARROW_DOWN},
 
-   {XK_Shift_L, FW_KEY_SHIFT},
-   {XK_Shift_R, FW_KEY_SHIFT},
-   {XK_Control_L, FW_KEY_CONTROL},
-   {XK_Control_R, FW_KEY_CONTROL}
-};
+              {XK_Shift_L, FW_KEY_SHIFT},
+              {XK_Shift_R, FW_KEY_SHIFT},
+              {XK_Control_L, FW_KEY_CONTROL},
+              {XK_Control_R, FW_KEY_CONTROL}};
 
 static void
 xkey_callb(XKeyEvent *event)
@@ -953,38 +963,38 @@ extern int
 kbd_vk2ascii(int vk)
 {
     switch (vk) {
-        case XK_Left:
-            return FW_KEY_ARROW_LEFT;
-        case XK_Up:
-            return FW_KEY_ARROW_UP;
-        case XK_Right:
-            return FW_KEY_ARROW_RIGHT;
-        case XK_Down:
-            return FW_KEY_ARROW_DOWN;
-        case XK_plus:
-            return FW_KEY_PLUS;
-        case XK_minus:
-            return FW_KEY_MINUS;
-        case XK_equal:
-            return FW_KEY_EQUALS;
-        case XK_Return:
-            return FW_KEY_ENTER;
-        case XK_space:
-            return FW_KEY_SPACE;
-        case XK_Tab:
-            return FW_KEY_TAB;
-        case XK_Escape:
-            return FW_KEY_ESCAPE;
-        case XK_Shift_L:
-        case XK_Shift_R:
-            return FW_KEY_SHIFT;
-        case XK_Control_L:
-        case XK_Control_R:
-            return FW_KEY_CONTROL;
-        case XK_BackSpace:
-            return FW_KEY_BACKSPACE;
-        default:
-            break;
+    case XK_Left:
+        return FW_KEY_ARROW_LEFT;
+    case XK_Up:
+        return FW_KEY_ARROW_UP;
+    case XK_Right:
+        return FW_KEY_ARROW_RIGHT;
+    case XK_Down:
+        return FW_KEY_ARROW_DOWN;
+    case XK_plus:
+        return FW_KEY_PLUS;
+    case XK_minus:
+        return FW_KEY_MINUS;
+    case XK_equal:
+        return FW_KEY_EQUALS;
+    case XK_Return:
+        return FW_KEY_ENTER;
+    case XK_space:
+        return FW_KEY_SPACE;
+    case XK_Tab:
+        return FW_KEY_TAB;
+    case XK_Escape:
+        return FW_KEY_ESCAPE;
+    case XK_Shift_L:
+    case XK_Shift_R:
+        return FW_KEY_SHIFT;
+    case XK_Control_L:
+    case XK_Control_R:
+        return FW_KEY_CONTROL;
+    case XK_BackSpace:
+        return FW_KEY_BACKSPACE;
+    default:
+        break;
     }
     if (vk >= 'A' && vk <= 'Z') {
         return vk + 32;
@@ -996,22 +1006,22 @@ kbd_vk2ascii(int vk)
         return vk - 48;
     }
     switch (vk) {
-        case 0xdb:
-            return '[';
-        case 0xdd:
-            return ']';
-        case 0xba:
-            return ';';
-        case 0xbb:
-            return '=';
-        case 0xbc:
-            return ',';
-        case 0xbd:
-            return '-';
-        case 0xbe:
-            return '.';
-        case 0xbf:
-            return '/';
+    case 0xdb:
+        return '[';
+    case 0xdd:
+        return ']';
+    case 0xba:
+        return ';';
+    case 0xbb:
+        return '=';
+    case 0xbc:
+        return ',';
+    case 0xbd:
+        return '-';
+    case 0xbe:
+        return '.';
+    case 0xbf:
+        return '/';
     }
     return vk;
 }

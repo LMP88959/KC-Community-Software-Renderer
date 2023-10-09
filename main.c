@@ -1,11 +1,11 @@
 /*****************************************************************************/
 /*
  * PiSHi LE (Lite edition) - Fundamentals of the King's Crook graphics engine.
- * 
+ *
  *   by EMMIR 2018-2022
- *   
+ *
  *   YouTube: https://www.youtube.com/c/LMP88
- *   
+ *
  * This software is released into the public domain.
  */
 /*****************************************************************************/
@@ -13,11 +13,11 @@
 #include "pl.h"
 
 /*  main.c
- * 
+ *
  * Basic demo showing how to define a 3D scene, generate geometry,
  * import geometry, implement first person camera controls, and transform
  * the geometry.
- * 
+ *
  * Controls:
  *      Arrow keys - looking
  *      W/A/S/D keys - movement
@@ -27,13 +27,13 @@
  *      2 - textured rendering
  *      3 - toggle between two FOVs
  *      SPACE - start/stop dynamic transformation
- * 
+ *
  */
 
 #include "fw/fw.h"
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 extern void *
 EXT_calloc(unsigned n, unsigned esz)
@@ -83,9 +83,8 @@ maketex(void)
 
     for (i = 0; i < PL_REQ_TEX_DIM; i++) {
         for (j = 0; j < PL_REQ_TEX_DIM; j++) {
-            if (i < 0x10 || j < 0x10 ||
-               (i > ((PL_REQ_TEX_DIM - 1) - 0x10)) ||
-               (j > ((PL_REQ_TEX_DIM - 1) - 0x10))) {
+            if (i < 0x10 || j < 0x10 || (i > ((PL_REQ_TEX_DIM - 1) - 0x10)) ||
+                (j > ((PL_REQ_TEX_DIM - 1) - 0x10))) {
                 /* border color */
                 c = 0x3f4f5f;
             } else {
@@ -112,96 +111,96 @@ init(void)
 {
     maketex();
 
-	PL_texture(&checktex);
-	texcube = PL_gen_box(CUSZ, CUSZ, CUSZ, PL_ALL, 255, 255, 255);
-	PL_texture(NULL);
-	floortile = PL_gen_box(CUSZ, CUSZ, CUSZ, PL_TOP, 77, 101, 94);
+    PL_texture(&checktex);
+    texcube = PL_gen_box(CUSZ, CUSZ, CUSZ, PL_ALL, 255, 255, 255);
+    PL_texture(NULL);
+    floortile = PL_gen_box(CUSZ, CUSZ, CUSZ, PL_TOP, 77, 101, 94);
 
-	import_dmdl("pots", &imported);
-	
-	PL_fov = 9;
-    
+    import_dmdl("pots", &imported);
+
+    PL_fov = 9;
+
     PL_cur_tex = NULL;
-	PL_cull_mode = PL_CULL_BACK;
-	PL_raster_mode = PL_TEXTURED;
-	
-	fpsclock = clk_sample();
+    PL_cull_mode = PL_CULL_BACK;
+    PL_raster_mode = PL_TEXTURED;
+
+    fpsclock = clk_sample();
 }
 
 static void
 update(void)
-{    
-	if (pkb_key_pressed(FW_KEY_ESCAPE)) {
-		sys_shutdown();
-	}
-	if (pkb_key_held(FW_KEY_ARROW_RIGHT)) {
-		camry += 1;
-	}
-	if (pkb_key_held(FW_KEY_ARROW_LEFT)) {
-		camry -= 1;
-	}
-	if (pkb_key_held(FW_KEY_ARROW_UP)) {
-		camrx -= 1;
-	}
-	if (pkb_key_held(FW_KEY_ARROW_DOWN)) {
-		camrx += 1;
-	}
+{
+    if (pkb_key_pressed(FW_KEY_ESCAPE)) {
+        sys_shutdown();
+    }
+    if (pkb_key_held(FW_KEY_ARROW_RIGHT)) {
+        camry += 1;
+    }
+    if (pkb_key_held(FW_KEY_ARROW_LEFT)) {
+        camry -= 1;
+    }
+    if (pkb_key_held(FW_KEY_ARROW_UP)) {
+        camrx -= 1;
+    }
+    if (pkb_key_held(FW_KEY_ARROW_DOWN)) {
+        camrx += 1;
+    }
 
-	if (pkb_key_held('w')) {
-		x += (MOVSPD * PL_sin[camry & PL_TRIGMSK]) >> PL_P;
-		y -= (MOVSPD * PL_sin[camrx & PL_TRIGMSK]) >> PL_P;
-		z += (MOVSPD * PL_cos[camry & PL_TRIGMSK]) >> PL_P;
-	}
-	if (pkb_key_held('s')) {
-		x -= (MOVSPD * PL_sin[camry & PL_TRIGMSK]) >> PL_P;
-		y += (MOVSPD * PL_sin[camrx & PL_TRIGMSK]) >> PL_P;
-		z -= (MOVSPD * PL_cos[camry & PL_TRIGMSK]) >> PL_P;
-	}
-	if (pkb_key_held('a')) {
-		x -= (MOVSPD * PL_cos[camry & PL_TRIGMSK]) >> PL_P;
-		z += (MOVSPD * PL_sin[camry & PL_TRIGMSK]) >> PL_P;
-	}
-	if (pkb_key_held('d')) {
-		x += (MOVSPD * PL_cos[camry & PL_TRIGMSK]) >> PL_P;
-		z -= (MOVSPD * PL_sin[camry & PL_TRIGMSK]) >> PL_P;
-	}
-	if (pkb_key_held('t')) {
-		y += MOVSPD;
-	}
-	if (pkb_key_held('g')) {
-		y -= MOVSPD;
-	}
-	if (pkb_key_pressed('c')) {
-		static int cmod = PL_CULL_BACK;
-		if (cmod == PL_CULL_BACK) {
-			cmod = PL_CULL_NONE;
-		} else if (cmod == PL_CULL_FRONT) {
-			cmod = PL_CULL_BACK;
-		} else {
-			cmod = PL_CULL_FRONT;
-		}
-		PL_cull_mode = cmod;
-	}
-	if (pkb_key_held('1')) {
-	    PL_raster_mode = PL_FLAT;
-	}
-	if (pkb_key_held('2')) {
-	    PL_raster_mode = PL_TEXTURED;
-	}
+    if (pkb_key_held('w')) {
+        x += (MOVSPD * PL_sin[camry & PL_TRIGMSK]) >> PL_P;
+        y -= (MOVSPD * PL_sin[camrx & PL_TRIGMSK]) >> PL_P;
+        z += (MOVSPD * PL_cos[camry & PL_TRIGMSK]) >> PL_P;
+    }
+    if (pkb_key_held('s')) {
+        x -= (MOVSPD * PL_sin[camry & PL_TRIGMSK]) >> PL_P;
+        y += (MOVSPD * PL_sin[camrx & PL_TRIGMSK]) >> PL_P;
+        z -= (MOVSPD * PL_cos[camry & PL_TRIGMSK]) >> PL_P;
+    }
+    if (pkb_key_held('a')) {
+        x -= (MOVSPD * PL_cos[camry & PL_TRIGMSK]) >> PL_P;
+        z += (MOVSPD * PL_sin[camry & PL_TRIGMSK]) >> PL_P;
+    }
+    if (pkb_key_held('d')) {
+        x += (MOVSPD * PL_cos[camry & PL_TRIGMSK]) >> PL_P;
+        z -= (MOVSPD * PL_sin[camry & PL_TRIGMSK]) >> PL_P;
+    }
+    if (pkb_key_held('t')) {
+        y += MOVSPD;
+    }
+    if (pkb_key_held('g')) {
+        y -= MOVSPD;
+    }
+    if (pkb_key_pressed('c')) {
+        static int cmod = PL_CULL_BACK;
+        if (cmod == PL_CULL_BACK) {
+            cmod = PL_CULL_NONE;
+        } else if (cmod == PL_CULL_FRONT) {
+            cmod = PL_CULL_BACK;
+        } else {
+            cmod = PL_CULL_FRONT;
+        }
+        PL_cull_mode = cmod;
+    }
+    if (pkb_key_held('1')) {
+        PL_raster_mode = PL_FLAT;
+    }
+    if (pkb_key_held('2')) {
+        PL_raster_mode = PL_TEXTURED;
+    }
 
-	if (pkb_key_pressed('3')) {
-		if (PL_fov == 8) {
-		    PL_fov = 9;
-		} else {
-		    PL_fov = 8;
-		}
-		printf("fov: %d\n", PL_fov);
-	}
+    if (pkb_key_pressed('3')) {
+        if (PL_fov == 8) {
+            PL_fov = 9;
+        } else {
+            PL_fov = 8;
+        }
+        printf("fov: %d\n", PL_fov);
+    }
 
-	if (pkb_key_pressed(' ')) {
-		rot = !rot;
-	}
-	sinvar++;
+    if (pkb_key_pressed(' ')) {
+        rot = !rot;
+    }
+    sinvar++;
 }
 
 static void
@@ -212,12 +211,12 @@ display(void)
     int mo;
 
     /* clear viewport to black */
-	PL_clear_vp(0, 0, 0);
-	PL_polygon_count = 0;
-    
+    PL_clear_vp(0, 0, 0);
+    PL_polygon_count = 0;
+
     /* define camera orientation */
     PL_set_camera(x, y, z, camrx, camry);
-    
+
     { /* draw imported model */
         PL_mst_push();
         if (rot) {
@@ -229,15 +228,12 @@ display(void)
         PL_render_object(imported);
         PL_mst_pop();
     }
-    
+
     /* draw tile grid */
     for (i = -GRSZ; i < GRSZ; i++) {
         for (j = -GRSZ; j < GRSZ; j++) {
             PL_mst_push();
-            PL_mst_translate(
-                       0 + i * CUSZ,
-                       0,
-                     600 + j * CUSZ);
+            PL_mst_translate(0 + i * CUSZ, 0, 600 + j * CUSZ);
             PL_render_object(floortile);
             PL_mst_pop();
         }
@@ -254,13 +250,13 @@ display(void)
         PL_render_object(texcube);
         PL_mst_pop();
     }
-	
-	if (clk_sample() > fpsclock) {
-	    fpsclock = clk_sample() + 1000;
-	    printf("FPS: %d\n", sys_getfps());
-	}
 
-	/* update window and sync */
+    if (clk_sample() > fpsclock) {
+        fpsclock = clk_sample() + 1000;
+        printf("FPS: %d\n", sys_getfps());
+    }
+
+    /* update window and sync */
     vid_blit();
     vid_sync();
 }
@@ -271,7 +267,7 @@ main(int argc, char **argv)
     if (argc != 1) {
         printf("note: %s does not take any arguments.\n", argv[0]);
     }
-    
+
     sys_init();
     sys_updatefunc(update);
     sys_displayfunc(display);
@@ -288,7 +284,7 @@ main(int argc, char **argv)
 
     /* give the video memory to PL */
     PL_init(vid_getinfo()->video, VW, VH);
-    
+
     init();
     sys_start();
 

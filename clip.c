@@ -1,11 +1,11 @@
 /*****************************************************************************/
 /*
  * PiSHi LE (Lite edition) - Fundamentals of the King's Crook graphics engine.
- * 
+ *
  *   by EMMIR 2018-2022
- *   
+ *
  *   YouTube: https://www.youtube.com/c/LMP88
- *   
+ *
  * This software is released into the public domain.
  */
 /*****************************************************************************/
@@ -13,20 +13,20 @@
 #include "pl.h"
 
 /*  clip.c
- * 
+ *
  * Code for defining and clipping polygons to the viewport and near plane.
- * 
+ *
  */
 
 #include <string.h>
 
 /* special return code specifying the edge was not clipped */
-#define PL_NC    0777
+#define PL_NC 0777
 
-#define HI_P     14     /* 2D clipping interpolation precision */
-#define HH_P     (HI_P >> 1)
+#define HI_P 14 /* 2D clipping interpolation precision */
+#define HH_P (HI_P >> 1)
 
-#define CLIP_P   8    /* 3D clipping interpolation precision */
+#define CLIP_P 8 /* 3D clipping interpolation precision */
 
 int PL_vp_min_x;
 int PL_vp_max_x;
@@ -38,25 +38,33 @@ int PL_vp_cen_y;
 extern void
 PL_set_viewport(int minx, int miny, int maxx, int maxy, int update_center)
 {
-	if (minx < 0) { minx = 0; }
-	if (miny < 0) { miny = 0; }
-	if (maxx >= PL_hres) { maxx = PL_hres - 1; }
-	if (maxy >= PL_vres) { maxy = PL_vres - 1; }
-	PL_vp_min_x = minx;
-	PL_vp_min_y = miny;
-	PL_vp_max_x = maxx;
-	PL_vp_max_y = maxy;
-	if (update_center) {
-	    PL_vp_cen_x = ((minx + maxx) >> 1) + 1;
-	    PL_vp_cen_y = ((miny + maxy) >> 1) + 1;
-	}
+    if (minx < 0) {
+        minx = 0;
+    }
+    if (miny < 0) {
+        miny = 0;
+    }
+    if (maxx >= PL_hres) {
+        maxx = PL_hres - 1;
+    }
+    if (maxy >= PL_vres) {
+        maxy = PL_vres - 1;
+    }
+    PL_vp_min_x = minx;
+    PL_vp_min_y = miny;
+    PL_vp_max_x = maxx;
+    PL_vp_max_y = maxy;
+    if (update_center) {
+        PL_vp_cen_x = ((minx + maxx) >> 1) + 1;
+        PL_vp_cen_y = ((miny + maxy) >> 1) + 1;
+    }
 }
 
 static void
 doclip(int *L, int *R, int *out, int len, int bound, int comp, int ocomp)
 {
     int i, f, fh, fhp;
-    
+
     fhp = ((bound - L[comp]) << 15) / (R[comp] - L[comp]);
     fh = fhp >> (15 - HI_P);
     f = fh >> HH_P;
@@ -78,7 +86,7 @@ lclip2(int **v0, int **v1, int len, int min, int max, int comp)
     static int resv[2 * PL_VDIM]; /* must be static */
     static int *m0 = resv + (0 * PL_VDIM);
     static int *m1 = resv + (1 * PL_VDIM);
-    
+
     int ooo = 1; /* out of order */
     int ret = 0;
     int *L, *R;
@@ -88,17 +96,17 @@ lclip2(int **v0, int **v1, int len, int min, int max, int comp)
     Rp = v0;
 
     if ((*Rp)[comp] < (*Lp)[comp]) {
-	    ooo = 0;
-	    Lp  = v0;
-		Rp  = v1;
-	}
+        ooo = 0;
+        Lp = v0;
+        Rp = v1;
+    }
 
     L = *Lp;
     R = *Rp;
-    
-	if ((L[comp] >= max) || (R[comp] <= min)) {
-		return PL_NC;
-	}
+
+    if ((L[comp] >= max) || (R[comp] <= min)) {
+        return PL_NC;
+    }
 
     if (L[comp] <= min) {
         ret = !ooo;
@@ -111,7 +119,7 @@ lclip2(int **v0, int **v1, int len, int min, int max, int comp)
         doclip(L, R, m1, len, max, comp, !comp);
         *Rp = m1;
     }
-	return ret;
+    return ret;
 }
 
 static int
@@ -119,7 +127,7 @@ lclip3(int **v0, int **v1, int len)
 {
     /* must be static, the memory is used after function execution */
     static int m[PL_VDIM];
-    
+
     int i, f;
     int ooo = 1; /* out of order */
     int ret = 0;
@@ -130,20 +138,20 @@ lclip3(int **v0, int **v1, int len)
     Rp = v0;
     if ((*Rp)[2] < (*Lp)[2]) {
         ooo = 0;
-        Lp  = v0;
-        Rp  = v1;
+        Lp = v0;
+        Rp = v1;
     }
-    
+
     L = *Lp;
     R = *Rp;
-    
+
     if (R[2] < PL_Z_NEAR_PLANE) {
         return PL_NC;
     }
     if (L[2] < PL_Z_NEAR_PLANE) {
         ret = !ooo;
         *Lp = m;
-        f    = ((PL_Z_NEAR_PLANE - L[2]) << CLIP_P) / (R[2] - L[2]);
+        f = ((PL_Z_NEAR_PLANE - L[2]) << CLIP_P) / (R[2] - L[2]);
         m[0] = L[0] + (f * (R[0] - L[0]) >> CLIP_P);
         m[1] = L[1] + (f * (R[1] - L[1]) >> CLIP_P);
         m[2] = PL_Z_NEAR_PLANE;
@@ -157,18 +165,18 @@ lclip3(int **v0, int **v1, int len)
 /* polygon clip */
 static int
 pclip(int *dst, int *src, int len, int num,
-      int (*clip)(int **v0, int **v1, int len, int min, int max),
-      int minv, int maxv)
+      int (*clip)(int **v0, int **v1, int len, int min, int max), int minv,
+      int maxv)
 {
     int nverts;
     int *out;
     int r, nbytes;
     int *v[2];
-    
+
     nverts = 0;
-    out    = dst;
+    out = dst;
     nbytes = len * sizeof(int);
-    
+
     while (num--) {
         v[1] = src;
         v[0] = src += len;
@@ -200,8 +208,8 @@ lineclipy(int **v0, int **v1, int len, int min, int max)
 static int
 lineclipnz(int **v0, int **v1, int len, int min, int max)
 {
-    (void) min;
-    (void) max;
+    (void)min;
+    (void)max;
     return lclip3(v0, v1, len);
 }
 
@@ -248,7 +256,7 @@ extern int
 PL_frustum_test(int minz, int maxz)
 {
     int outc;
-    
+
     if (maxz <= PL_Z_NEAR_PLANE) {
         return PL_Z_OUTC_OUTSIDE;
     }
