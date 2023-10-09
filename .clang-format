@@ -7,3 +7,4 @@ Language: Cpp
 PointerAlignment: Right
 UseTab: Never
 InsertBraces: true
+AlignConsecutiveMacros: true

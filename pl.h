@@ -72,15 +72,15 @@ extern int PL_clip_poly_nz(int *dst, int *src, int len, int num);
 /* maximum number of vertices in object */
 #define PL_MAX_OBJ_V 4096
 
-#define PL_FLAT 1
+#define PL_FLAT     1
 #define PL_TEXTURED 0
 
-#define PL_CULL_NONE 0
+#define PL_CULL_NONE  0
 #define PL_CULL_FRONT 1
-#define PL_CULL_BACK 2
+#define PL_CULL_BACK  2
 
 /* for storage size definition */
-#define PL_VDIM 5      /* X Y Z U V */
+#define PL_VDIM      5 /* X Y Z U V */
 #define PL_POLY_VLEN 3 /* Idx U V */
 
 extern int PL_fov; /* min valid value = 8 */
@@ -118,7 +118,7 @@ extern void PL_copy_object(struct PL_OBJ *dst, struct PL_OBJ *src);
 /*****************************************************************************/
 
 #define PL_TRIANGLES 0x00
-#define PL_QUADS 0x01
+#define PL_QUADS     0x01
 
 extern void PL_ibeg(void); /* begin primitive */
 /* type is PL_TRIANGLES or PL_QUADS */
@@ -152,14 +152,14 @@ extern struct PL_OBJ *PL_get_working_copy(void);
 
 /* textures must be square with a dimension of (1 << PL_REQ_TEX_LOG_DIM) */
 #define PL_REQ_TEX_LOG_DIM 7
-#define PL_REQ_TEX_DIM (1 << PL_REQ_TEX_LOG_DIM)
+#define PL_REQ_TEX_DIM     (1 << PL_REQ_TEX_LOG_DIM)
 
 #define PL_TP 12 /* texture interpolation precision */
 
 #define PL_MAX_POLY_VERTS 8 /* max verts in a polygon (post-clip) */
 
 #define PL_STREAM_FLAT 3 /* X Y Z */
-#define PL_STREAM_TEX 5  /* X Y Z U V */
+#define PL_STREAM_TEX  5 /* X Y Z U V */
 
 extern int PL_polygon_count; /* number of polygons rendered */
 
@@ -213,7 +213,7 @@ extern void PL_lintx_poly(int *stream, int len, int *texel);
 #define PL_VLEN 4
 
 /* precision for fixed point math */
-#define PL_P 15
+#define PL_P     15
 #define PL_P_ONE (1 << PL_P)
 
 /* identity matrix */
@@ -263,13 +263,13 @@ extern void PL_mat_cpy(int *dst, int *src);
 /*****************************************************************************/
 
 /* flags to specify the faces of the box to generate */
-#define PL_TOP 001
+#define PL_TOP    001
 #define PL_BOTTOM 002
-#define PL_BACK 004
-#define PL_FRONT 010
-#define PL_LEFT 020
-#define PL_RIGHT 040
-#define PL_ALL 077
+#define PL_BACK   004
+#define PL_FRONT  010
+#define PL_LEFT   020
+#define PL_RIGHT  040
+#define PL_ALL    077
 
 /* generate immediate mode commands for a box */
 extern void PL_gen_box_list(int x, int y, int z, int w, int h, int d,
@@ -290,7 +290,7 @@ extern int import_dmdl(char *name, struct PL_OBJ **o); /* import DMDL object */
 /*****************************************************************************/
 
 #define PL_ERR_NO_MEM 0
-#define PL_ERR_MISC 1
+#define PL_ERR_MISC   1
 /* error function (PL expects program to halt after calling this) */
 extern void EXT_error(int err_id, char *modname, char *msg);
 

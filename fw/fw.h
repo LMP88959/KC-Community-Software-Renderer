@@ -91,11 +91,11 @@ extern int sys_getfps(void);     /* get current fps of system */
 extern void sys_capfps(int cap); /* limit fps to hz specified by sys_sethz */
 /***********************************************************************/
 
-#define FW_VFLAG_NONE 000
+#define FW_VFLAG_NONE    000
 #define FW_VFLAG_VIDFAST 002 /* request the fastest graphics context */
 
-#define FW_VERR_OK 0
-#define FW_VERR_NOMEM 1
+#define FW_VERR_OK     0
+#define FW_VERR_NOMEM  1
 #define FW_VERR_WINDOW 2
 
 /* video device functions */
@@ -120,20 +120,20 @@ extern utime clk_sample(void);  /* sample the clock (milliseconds) */
 /***********************************************************************/
 
 /* keyboard input functions */
-#define FW_KEY_ARROW_LEFT 0x25
-#define FW_KEY_ARROW_UP 0x26
+#define FW_KEY_ARROW_LEFT  0x25
+#define FW_KEY_ARROW_UP    0x26
 #define FW_KEY_ARROW_RIGHT 0x27
-#define FW_KEY_ARROW_DOWN 0x28
-#define FW_KEY_PLUS '+'
-#define FW_KEY_MINUS '-'
-#define FW_KEY_EQUALS '='
-#define FW_KEY_ENTER 0x0d
-#define FW_KEY_SPACE 0x20
-#define FW_KEY_TAB 0x09
-#define FW_KEY_ESCAPE 0x1b
-#define FW_KEY_SHIFT 0x10
-#define FW_KEY_CONTROL 0x11
-#define FW_KEY_BACKSPACE 0x08
+#define FW_KEY_ARROW_DOWN  0x28
+#define FW_KEY_PLUS        '+'
+#define FW_KEY_MINUS       '-'
+#define FW_KEY_EQUALS      '='
+#define FW_KEY_ENTER       0x0d
+#define FW_KEY_SPACE       0x20
+#define FW_KEY_TAB         0x09
+#define FW_KEY_ESCAPE      0x1b
+#define FW_KEY_SHIFT       0x10
+#define FW_KEY_CONTROL     0x11
+#define FW_KEY_BACKSPACE   0x08
 
 extern int kbd_vk2ascii(int vk);          /* virtual keycode to ascii */
 extern void kbd_ignorerepeat(int ignore); /* ignore OS key repeat when held */

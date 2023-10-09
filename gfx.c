@@ -32,11 +32,11 @@ int *PL_depth_buffer = NULL;
 
 #define ZP 15 /* z precision */
 
-#define TXSH PL_REQ_TEX_LOG_DIM
-#define TXMSK ((1 << (TXSH + PL_TP)) - 1)
+#define TXSH   PL_REQ_TEX_LOG_DIM
+#define TXMSK  ((1 << (TXSH + PL_TP)) - 1)
 #define TXVMSK (TXMSK & (~((1 << PL_TP) - 1)))
 
-#define ATTRIBS 8
+#define ATTRIBS     8
 #define ATTRIB_BITS 3
 /* y to table */
 #define YT(y) ((y) << ATTRIB_BITS)
@@ -49,7 +49,7 @@ int *PL_depth_buffer = NULL;
 #define UR(ytb) ((ytb) + 3)
 #define VR(ytb) ((ytb) + 5)
 
-#define SCANP 18
+#define SCANP       18
 #define SCANP_ROUND (1 << (SCANP - 1))
 
 static int scan_miny;
@@ -63,10 +63,10 @@ static int g3dresv[PL_MAX_SCREENSIZE               /* x_L */
                    + (ATTRIBS * PL_MAX_SCREENSIZE) /* attrbuf */
 ];
 
-#define G3R_OFFS_XL (0)
-#define G3R_OFFS_XR (G3R_OFFS_XL + PL_MAX_SCREENSIZE)
-#define G3R_OFFS_XLC (G3R_OFFS_XR + PL_MAX_SCREENSIZE)
-#define G3R_OFFS_XLR (G3R_OFFS_XLC + PL_MAX_SCREENSIZE)
+#define G3R_OFFS_XL   (0)
+#define G3R_OFFS_XR   (G3R_OFFS_XL + PL_MAX_SCREENSIZE)
+#define G3R_OFFS_XLC  (G3R_OFFS_XR + PL_MAX_SCREENSIZE)
+#define G3R_OFFS_XLR  (G3R_OFFS_XLC + PL_MAX_SCREENSIZE)
 #define G3R_OFFS_ATTR (G3R_OFFS_XLR + PL_MAX_SCREENSIZE)
 
 static int *x_L = g3dresv + G3R_OFFS_XL;

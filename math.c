@@ -130,7 +130,7 @@ PL_mst_translate(int x, int y, int z)
     PL_mst_mul(mat);
 }
 
-#define _M_(x, y) (((x) * (y)) >> PL_P)
+#define _M_(x, y)  (((x) * (y)) >> PL_P)
 #define _MI_(i, j) (((i) << 2) + (j))
 
 extern void
