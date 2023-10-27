@@ -10,7 +10,7 @@
  */
 /*****************************************************************************/
 
-#include "pl.h"
+#include <pl.h>
 
 /*  main.c
  *
@@ -30,7 +30,8 @@
  *
  */
 
-#include "fw/fw.h"
+#include <fw.h>
+#include <ma.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -267,6 +268,10 @@ main(int argc, char **argv)
     if (argc != 1) {
         printf("note: %s does not take any arguments.\n", argv[0]);
     }
+
+    /* TODO: Literally anything */
+    MA_modules_init();
+    MA_modules_list();
 
     sys_init();
     sys_updatefunc(update);

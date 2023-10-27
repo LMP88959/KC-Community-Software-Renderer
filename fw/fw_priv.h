@@ -21,16 +21,15 @@
 
 #include "fw.h"
 
-#if FW_OS_TYPE_WINDOWS
-#ifdef KC_OS_WIN_BUILD
-#if KC_OS_WIN_BUILD >= 10240
-#define _WIN32_WINNT 0x0605
-#define WINVER 0x0605
-#else
-#error Windows >8.1 required for AdjustWindowRectExForDpi!
+#if FW_OS_TYPE_WINDOWS && defined(KC_OS_WIN_BUILD)
+/* explicit build version */
+#  if KC_OS_WIN_BUILD >= 10240
+#    define _WIN32_WINNT 0x0605
+#    define WINVER 0x0605
+#  else
+#    error Windows >8.1 required for AdjustWindowRectExForDpi!
+#  endif
 #endif
-#endif /* KC_OS_WINVER */
-#endif /* FW_OS_TYPE_WINDOWS */
 
 /***********************************************************************/
 
