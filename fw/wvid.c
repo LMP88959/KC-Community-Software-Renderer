@@ -33,8 +33,9 @@
 #define NOKERNEL
 #define OEMRESOURCE
 #undef UNICODE
-#include <mmsystem.h>
+
 #include <windows.h>
+#include <mmsystem.h>
 
 #include <ctype.h>
 #include <inttypes.h>
@@ -48,9 +49,14 @@
 
 #define FW_CLASSNAME "FWLE"
 
+#if FW_DEFAULT_TITLE_SIZE < 6
+#error TITLE_SIZE Needs to be at least 6!
+#endif
+
 static char *
 FWi_strdup(char *src)
 {
+    const size_t X = WINVER; 
     size_t len;
     char *dst;
     len = strlen(src);
@@ -137,7 +143,7 @@ os_message_handler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 extern int
 vid_open(char *title, int width, int height, int scale, int flags)
 {
-    static LPCSTR default_title = "vFWLE";
+    static char default_title[FW_DEFAULT_TITLE_SIZE] = "vFWLE";
     static int cret = 0;
     WNDCLASSEX w = {0};
     HDC hdc;

@@ -21,9 +21,20 @@
 
 #include "fw.h"
 
-#ifdef __cplusplus
-extern "C" {
+#if FW_OS_TYPE_WINDOWS
+#ifdef KC_OS_WIN_BUILD
+#if KC_OS_WIN_BUILD >= 10240
+#define _WIN32_WINNT 0x0605
+#define WINVER 0x0605
+#else
+#error Windows >8.1 required for AdjustWindowRectExForDpi!
 #endif
+#endif /* KC_OS_WINVER */
+#endif /* FW_OS_TYPE_WINDOWS */
+
+/***********************************************************************/
+
+KC_BEGIN_C_HEADER
 
 #define FW_CALC_PITCH(w, bpp) ((((w) * (bpp)) + 3) & ~3)
 #define FW_BYTE_ALIGN(w, bpp) (FW_CALC_PITCH(w, bpp) / (bpp))
@@ -33,8 +44,6 @@ extern void pkb_poll(void);      /* gets called every loop */
 extern int wnd_osm_handle(void); /* poll the operating system for events */
 extern void wnd_term(void);      /* clean up and close the active window */
 
-#ifdef __cplusplus
-}
-#endif
+KC_END_C_HEADER
 
 #endif
