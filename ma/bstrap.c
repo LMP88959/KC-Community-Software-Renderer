@@ -2,7 +2,7 @@
 /*
  * MApi - Module interface for the KC Community Software Renderer
  *
- *   by SAALTY, EIGHTFOLD 2023
+ *   by EIGHTFOLD 2023
  *
  * This software is released into the public domain.
  */
@@ -10,7 +10,7 @@
 
 #include "ma_priv.h"
 
-/* ma.c
+/* bstrap.c
  *
  * Implements the submodule bootstrapper.
  *

@@ -13,7 +13,7 @@
 
 #include "ma.h"
 
-/* ma.h
+/* ma_priv.h
  *
  * Contains functions and structs only used internally.
  *

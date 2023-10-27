@@ -1,3 +1,13 @@
+/*****************************************************************************/
+/*
+ * MApi - Module interface for the KC Community Software Renderer
+ *
+ *   by EIGHTFOLD 2023
+ *
+ * This software is released into the public domain.
+ */
+/*****************************************************************************/
+
 #include <ma.h>
 
 struct MA_POSTPROCESS_MODULE EXAMPLE_mod;
