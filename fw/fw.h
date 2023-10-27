@@ -31,35 +31,36 @@
 #if defined(WIN32) || defined(_WIN32) || defined(_WIN32_)
 /* windows */
 #define FW_OS_TYPE_WINDOWS 1
+
 #else
 /* unix + X11 */
 #define FW_OS_TYPE_X11 1
 
 /* define as 1 if you want to compile with MIT-SHM support */
 #ifndef FW_X11_HAS_SHM_EXT
-#define FW_X11_HAS_SHM_EXT 1
+#  define FW_X11_HAS_SHM_EXT 1
 #endif
 
 /* define as 1 if running X11 under macOS with XQuartz */
 #ifndef FW_X11_IS_MACOS
-#ifdef __APPLE__
-#define FW_X11_IS_MACOS 1
-#else
-#define FW_X11_IS_MACOS 0
-#endif
+#  ifdef __APPLE__
+#    define FW_X11_IS_MACOS 1
+#  else
+#    define FW_X11_IS_MACOS 0
+#  endif
 #endif
 
 #endif
 /***********************************************************************/
 
 #ifdef __cplusplus
-#define KC_BEGIN_C_HEADER FW_C_API {
-#define KC_END_C_HEADER }
-#define KC_C_API extern "C"
+#  define KC_BEGIN_C_HEADER FW_C_API {
+#  define KC_END_C_HEADER }
+#  define KC_C_API extern "C"
 #else
-#define KC_BEGIN_C_HEADER
-#define KC_END_C_HEADER
-#define KC_C_API
+#  define KC_BEGIN_C_HEADER
+#  define KC_END_C_HEADER
+#  define KC_C_API
 #endif
 
 /***********************************************************************/
@@ -67,16 +68,16 @@
 KC_BEGIN_C_HEADER
 
 #ifndef NULL
-#define NULL ((void *)0)
+#  define NULL ((void *)0)
 #endif
 
 #ifdef VOLATILE
-#undef VOLATILE
+#  undef VOLATILE
 #endif
 #define VOLATILE volatile
 
 #ifndef FW_DEFAULT_TITLE_SIZE
-#define FW_DEFAULT_TITLE_SIZE 16
+#  define FW_DEFAULT_TITLE_SIZE 16
 #endif
 
 /***********************************************************************/

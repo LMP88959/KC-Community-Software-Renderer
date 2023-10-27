@@ -20,13 +20,13 @@
  */
 
 #ifdef __cplusplus
-#define KC_BEGIN_C_HEADER FW_C_API {
-#define KC_END_C_HEADER }
-#define KC_C_API extern "C"
+#  define KC_BEGIN_C_HEADER FW_C_API {
+#  define KC_END_C_HEADER }
+#  define KC_C_API extern "C"
 #else
-#define KC_BEGIN_C_HEADER
-#define KC_END_C_HEADER
-#define KC_C_API
+#  define KC_BEGIN_C_HEADER
+#  define KC_END_C_HEADER
+#  define KC_C_API
 #endif
 
 KC_BEGIN_C_HEADER

@@ -9,31 +9,15 @@ project(PL3D-KC LANGUAGES C)
 
 include(GNUInstallDirs)
 
-if(UNIX)
-  # apt install libx11-dev libxext-dev
-  # brew install libx11 xquartz
-  find_package(X11 REQUIRED)
-elseif(WIN32)
-  string(REGEX MATCH "[0-9]+$" KC_WIN_BUILD ${CMAKE_SYSTEM_VERSION})
-endif()
-
-add_library(fw fw/pkb.c fw/sys.c
-  $<$<BOOL:${WIN32}>:fw/wvid.c>
-  $<$<BOOL:${UNIX}>:fw/xvid.c>
-)
-target_link_libraries(fw PRIVATE
-  $<$<BOOL:${UNIX}>:X11::Xext>
-  $<$<BOOL:${WIN32}>:winmm>
-)
-target_include_directories(fw PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/fw)
-target_compile_definitions(fw PRIVATE $<$<BOOL:${WIN32}>:KC_OS_WIN_BUILD=${KC_WIN_BUILD}>)
-
-add_library(pl clip.c gfx.c imode.c importer.c math.c pl.c)
-target_include_directories(pl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_compile_definitions(pl PRIVATE $<$<BOOL:${MSVC}>:_CRT_SECURE_NO_WARNINGS>)
+add_subdirectory(fw)
+add_subdirectory(pl)
+add_subdirectory(ma)
+add_subdirectory(mods)
 
 add_executable(main main.c)
-target_link_libraries(main PRIVATE pl fw)
+target_link_libraries(main PRIVATE 
+  kc::FW kc::PL 
+  kc::MA kc::MODS)
 
 # --- install
 # Rpath options necessary for shared library install to work correctly in user projects
@@ -48,8 +32,8 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX "${PROJECT_BINARY_DIR}" CACHE PATH "default install path" FORCE)
 endif()
 
-install(FILES fw/fw.h pl.h TYPE INCLUDE)
-install(TARGETS pl fw main)
+install(FILES fw/fw.h pl/pl.h TYPE INCLUDE)
+install(TARGETS fw pl main)
 
 
 # --- auto-ignore build directory

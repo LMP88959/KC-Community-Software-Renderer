@@ -25,7 +25,7 @@ $(BIN_DIR):
 $(LIBFW_DEPS): $(BIN_DIR)/%.o: fw/%.c fw/fw.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(LIBPL_DEPS): $(BIN_DIR)/%.o: %.c pl.h
+$(LIBPL_DEPS): $(BIN_DIR)/%.o: main.c pl/%.c pl/pl.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(LIBFW): $(LIBFW_DEPS)
@@ -34,7 +34,7 @@ $(LIBFW): $(LIBFW_DEPS)
 $(LIBPL): $(LIBPL_DEPS)
 	ld -r -o $@ $(LIBPL_DEPS)
 
-$(EXECS): %: %.c pl.h fw/fw.h $(LIBPL) $(LIBFW)
+$(EXECS): %: pl/pl.h fw/fw.h $(LIBPL) $(LIBFW)
 	$(CC) $(CFLAGS) $< -o $@ $(LIBPL) $(LIBFW) $(LIBS)
 
 clean:
