@@ -13,17 +13,20 @@ if(UNIX)
   # apt install libx11-dev libxext-dev
   # brew install libx11 xquartz
   find_package(X11 REQUIRED)
+elseif(WIN32)
+  string(REGEX MATCH "[0-9]+$" KC_WIN_BUILD ${CMAKE_SYSTEM_VERSION})
 endif()
 
 add_library(fw fw/pkb.c fw/sys.c
-$<$<BOOL:${WIN32}>:fw/wvid.c>
-$<$<BOOL:${UNIX}>:fw/xvid.c>
+  $<$<BOOL:${WIN32}>:fw/wvid.c>
+  $<$<BOOL:${UNIX}>:fw/xvid.c>
+)
+target_link_libraries(fw PRIVATE
+  $<$<BOOL:${UNIX}>:X11::Xext>
+  $<$<BOOL:${WIN32}>:winmm>
 )
 target_include_directories(fw PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/fw)
-target_link_libraries(fw PRIVATE
-$<$<BOOL:${UNIX}>:X11::Xext>
-$<$<BOOL:${WIN32}>:winmm>
-)
+target_compile_definitions(fw PRIVATE $<$<BOOL:${WIN32}>:KC_OS_WIN_BUILD=${KC_WIN_BUILD}>)
 
 add_library(pl clip.c gfx.c imode.c importer.c math.c pl.c)
 target_include_directories(pl PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

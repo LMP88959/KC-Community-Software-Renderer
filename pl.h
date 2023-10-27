@@ -20,8 +20,16 @@
  */
 
 #ifdef __cplusplus
-extern "C" {
+#define KC_BEGIN_C_HEADER FW_C_API {
+#define KC_END_C_HEADER }
+#define KC_C_API extern "C"
+#else
+#define KC_BEGIN_C_HEADER
+#define KC_END_C_HEADER
+#define KC_C_API
 #endif
+
+KC_BEGIN_C_HEADER
 
 /* maximum possible horizontal or vertical resolution */
 #define PL_MAX_SCREENSIZE 2048
@@ -299,8 +307,6 @@ extern void *EXT_calloc(unsigned, unsigned);
 /* memory freeing function */
 extern void EXT_free(void *);
 
-#ifdef __cplusplus
-}
-#endif
+KC_END_C_HEADER
 
 #endif

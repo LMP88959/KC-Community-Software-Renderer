@@ -53,8 +53,18 @@
 /***********************************************************************/
 
 #ifdef __cplusplus
-extern "C" {
+#define KC_BEGIN_C_HEADER FW_C_API {
+#define KC_END_C_HEADER }
+#define KC_C_API extern "C"
+#else
+#define KC_BEGIN_C_HEADER
+#define KC_END_C_HEADER
+#define KC_C_API
 #endif
+
+/***********************************************************************/
+
+KC_BEGIN_C_HEADER
 
 #ifndef NULL
 #define NULL ((void *)0)
@@ -64,6 +74,10 @@ extern "C" {
 #undef VOLATILE
 #endif
 #define VOLATILE volatile
+
+#ifndef FW_DEFAULT_TITLE_SIZE
+#define FW_DEFAULT_TITLE_SIZE 16
+#endif
 
 /***********************************************************************/
 
@@ -150,8 +164,6 @@ extern int pkb_key_held(int key);    /* this tests if key is being held */
 extern void FW_info(char *s, ...);  /* info message */
 extern void FW_error(char *s, ...); /* error message (halts program) */
 
-#ifdef __cplusplus
-}
-#endif
+KC_END_C_HEADER
 
 #endif
